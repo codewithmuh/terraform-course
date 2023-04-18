@@ -1,7 +1,7 @@
 
 // Configure the AWS Provider
 provider "aws" {
-  region     = "us-east-1"
+  region = "us-east-1"
 }
 
 // **  Project Codewithmuh **
@@ -9,7 +9,7 @@ provider "aws" {
 # 1) Create VPC
 resource "aws_vpc" "A" {
   cidr_block = "10.0.0.0/16"
-  
+
   tags = {
     name = "Codewithmuh"
   }
@@ -35,7 +35,7 @@ resource "aws_route_table" "RT_Codewithmuh" {
 
   route {
     ipv6_cidr_block = "::/0"
-    gateway_id = aws_internet_gateway.GW_Codewithmuh.id
+    gateway_id      = aws_internet_gateway.GW_Codewithmuh.id
   }
 
   tags = {
@@ -45,10 +45,10 @@ resource "aws_route_table" "RT_Codewithmuh" {
 
 # 4) Create Subnet
 resource "aws_subnet" "Subnet_Codewithmuh" {
-  vpc_id     = aws_vpc.A.id
-  cidr_block = "10.0.0.0/24"
+  vpc_id            = aws_vpc.A.id
+  cidr_block        = "10.0.0.0/24"
   availability_zone = "us-east-1a"
-  depends_on = [aws_internet_gateway.GW_Codewithmuh]
+  depends_on        = [aws_internet_gateway.GW_Codewithmuh]
 
   tags = {
     Name = "Subnet_Codewithmuh"
@@ -113,7 +113,7 @@ resource "aws_network_interface" "ENI_A" {
 
 # 8) Assign Elastic IP to ENI
 resource "aws_eip" "EIP_A" {
-  
+
   vpc                       = true
   network_interface         = aws_network_interface.ENI_A.id
   associate_with_private_ip = "10.0.0.10"
@@ -147,20 +147,20 @@ resource "aws_iam_role" "EC2-S3" {
 EOF
 
   tags = {
-      Name = "EC2-S3"
+    Name = "EC2-S3"
   }
 }
 
 // IAM Profile
 resource "aws_iam_instance_profile" "EC2-S3_Profile" {
   name = "EC2-S3_Profile"
-  role = "${aws_iam_role.EC2-S3.name}"
+  role = aws_iam_role.EC2-S3.name
 }
 
 // IAM Policy
 resource "aws_iam_role_policy" "EC2-S3_Policy" {
   name = "test_policy"
-  role = "${aws_iam_role.EC2-S3.id}"
+  role = aws_iam_role.EC2-S3.id
 
   policy = <<EOF
 {
@@ -176,19 +176,19 @@ resource "aws_iam_role_policy" "EC2-S3_Policy" {
   ]
 }
 EOF
- 
+
 }
 
 # 10) Create Linux Server and Install/Enable Apache2
 resource "aws_instance" "Instance_A" {
-  ami                  = "ami-0947d2ba12ee1ff75" 
+  ami                  = "ami-0947d2ba12ee1ff75"
   instance_type        = "t2.micro"
   availability_zone    = "us-east-1a"
   key_name             = "codewithmuh1"
-  iam_instance_profile = "${aws_iam_instance_profile.EC2-S3_Profile.name}"
-  
+  iam_instance_profile = aws_iam_instance_profile.EC2-S3_Profile.name
+
   network_interface {
-    device_index = 0
+    device_index         = 0
     network_interface_id = aws_network_interface.ENI_A.id
   }
 
